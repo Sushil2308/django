@@ -27,7 +27,7 @@ from django.utils.regex_helper import _lazy_re_compile, normalize
 from django.utils.translation import get_language
 
 from .converters import get_converters
-from .exceptions import NoReverseMatch, Resolver404
+from .exceptions import NoReverseMatch, Resolver404, HTTP410
 from .utils import get_callable
 
 
@@ -664,6 +664,8 @@ class URLResolver:
         if match:
             new_path, args, kwargs = match
             for pattern in self.url_patterns:
+                if pattern.get('disable', False):  # Check if 'disable' is True
+                    raise HTTP410(f"The URL {path} is disabled and no longer available.")  # Raise 410 error
                 try:
                     sub_match = pattern.resolve(new_path)
                 except Resolver404 as e:
