@@ -1,4 +1,4 @@
-from django.http import Http404
+from django.http import Http404, HttpResponseGone
 
 
 class Resolver404(Http404):
@@ -6,4 +6,8 @@ class Resolver404(Http404):
 
 
 class NoReverseMatch(Exception):
+    pass
+
+
+class HTTP410(HttpResponseGone):
     pass
