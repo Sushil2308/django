@@ -12,7 +12,6 @@ from uuid import UUID
 from django.core.exceptions import EmptyResultSet, FieldError, FullResultSet
 from django.db import DatabaseError, NotSupportedError, connection
 from django.db.models import fields
-from django.db.models.fields import IntegerField, FloatField, DecimalField
 from django.db.models.constants import LOOKUP_SEP
 from django.db.models.query_utils import Q
 from django.utils.deconstruct import deconstructible
