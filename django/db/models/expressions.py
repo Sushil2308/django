@@ -2141,22 +2141,3 @@ class ValueRange(WindowFrame):
 
     def window_frame_start_end(self, connection, start, end):
         return connection.ops.window_frame_range_start_end(start, end)
-
-@deconstructible(path="django.db.models.ABS")
-class ABS(Func):
-    function = "ABS"
-
-    def as_sql(self, compiler, connection, function=None, template=None):
-        # Determine the output field based on the type of the input field
-        output_field_class = self.output_field.__class__
-        if output_field_class == IntegerField:
-            output_field = IntegerField()
-        elif output_field_class == FloatField:
-            output_field = FloatField()
-        elif output_field_class == DecimalField:
-            output_field = DecimalField(max_digits=self.output_field.max_digits, decimal_places=self.output_field.decimal_places)
-        else:
-            raise ValueError("Unsupported field type for ABS function")
-
-        self.output_field = output_field
-        return super().as_sql(compiler, connection, function=function, template=template)
