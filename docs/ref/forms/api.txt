@@ -406,8 +406,8 @@ process:
 .. code-block:: pycon
 
     >>> f.base_fields["subject"].label_suffix = "?"
-    >>> another_f = CommentForm(auto_id=False)
-    >>> f.as_div().split("</div>")[0]
+    >>> another_f = ContactForm(auto_id=False)
+    >>> another_f.as_div().split("</div>")[0]
     '<div><label for="id_subject">Subject?</label><input type="text" name="subject" maxlength="100" required id="id_subject">'
 
 Accessing "clean" data
@@ -511,7 +511,7 @@ empty string, because ``nick_name`` is ``CharField``, and ``CharField``\s treat
 empty values as an empty string. Each field type knows what its "blank" value
 is -- e.g., for ``DateField``, it's ``None`` instead of the empty string. For
 full details on each field's behavior in this case, see the "Empty value" note
-for each field in the "Built-in ``Field`` classes" section below.
+for each field in the :ref:`built-in-fields` section below.
 
 You can write code to perform validation for particular form fields (based on
 their name) or for the form as a whole (considering combinations of various
@@ -770,7 +770,7 @@ The template used by ``as_table()``. Default: ``'django/forms/table.html'``.
     >>> f = ContactForm()
     >>> f.as_table()
     '<tr><th><label for="id_subject">Subject:</label></th><td><input id="id_subject" type="text" name="subject" maxlength="100" required></td></tr>\n<tr><th><label for="id_message">Message:</label></th><td><input type="text" name="message" id="id_message" required></td></tr>\n<tr><th><label for="id_sender">Sender:</label></th><td><input type="email" name="sender" id="id_sender" required></td></tr>\n<tr><th><label for="id_cc_myself">Cc myself:</label></th><td><input type="checkbox" name="cc_myself" id="id_cc_myself"></td></tr>'
-    >>> print(f)
+    >>> print(f.as_table())
     <tr><th><label for="id_subject">Subject:</label></th><td><input id="id_subject" type="text" name="subject" maxlength="100" required></td></tr>
     <tr><th><label for="id_message">Message:</label></th><td><input type="text" name="message" id="id_message" required></td></tr>
     <tr><th><label for="id_sender">Sender:</label></th><td><input type="email" name="sender" id="id_sender" required></td></tr>
@@ -1192,10 +1192,6 @@ Attributes of ``BoundField``
     When rendering a field with errors, ``aria-invalid="true"`` will be set on
     the field's widget to indicate there is an error to screen reader users.
 
-    .. versionchanged:: 5.0
-
-        The ``aria-invalid="true"`` was added when a field has errors.
-
 .. attribute:: BoundField.field
 
     The form :class:`~django.forms.Field` instance from the form class that
@@ -1289,8 +1285,6 @@ Attributes of ``BoundField``
 
 .. attribute:: BoundField.template_name
 
-    .. versionadded:: 5.0
-
     The name of the template rendered with :meth:`.BoundField.as_field_group`.
 
     A property returning the value of the
@@ -1322,8 +1316,6 @@ Methods of ``BoundField``
 -------------------------
 
 .. method:: BoundField.as_field_group()
-
-    .. versionadded:: 5.0
 
     Renders the field using :meth:`.BoundField.render` with default values
     which renders the ``BoundField``, including its label, help text and errors
@@ -1371,8 +1363,6 @@ Methods of ``BoundField``
         'foo bar required'
 
 .. method:: BoundField.get_context()
-
-    .. versionadded:: 5.0
 
     Return the template context for rendering the field. The available context
     is ``field`` being the instance of the bound field.
@@ -1425,8 +1415,6 @@ Methods of ``BoundField``
     ``<label>``.
 
 .. method:: BoundField.render(template_name=None, context=None, renderer=None)
-
-    .. versionadded:: 5.0
 
     The render method is called by ``as_field_group``. All arguments are 
     optional and default to:

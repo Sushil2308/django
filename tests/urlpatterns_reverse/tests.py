@@ -1,6 +1,7 @@
 """
 Unit tests for reverse URL lookups.
 """
+
 import pickle
 import sys
 import threading
@@ -520,6 +521,15 @@ class URLPatternReverse(SimpleTestCase):
         )
         with self.assertRaisesMessage(NoReverseMatch, msg):
             reverse("places", kwargs={"arg1": 2})
+
+    def test_view_func_from_cbv(self):
+        expected = "/hello/world/"
+        url = reverse(views.view_func_from_cbv, kwargs={"name": "world"})
+        self.assertEqual(url, expected)
+
+    def test_view_func_from_cbv_no_expected_kwarg(self):
+        with self.assertRaises(NoReverseMatch):
+            reverse(views.view_func_from_cbv)
 
 
 class ResolverTests(SimpleTestCase):
@@ -1455,7 +1465,7 @@ class RequestURLconfTests(SimpleTestCase):
 
 
 class ErrorHandlerResolutionTests(SimpleTestCase):
-    """Tests for handler400, handler404 and handler500"""
+    """Tests for handler400, handler403, handler404 and handler500"""
 
     def setUp(self):
         urlconf = "urlpatterns_reverse.urls_error_handlers"
@@ -1464,12 +1474,12 @@ class ErrorHandlerResolutionTests(SimpleTestCase):
         self.callable_resolver = URLResolver(RegexPattern(r"^$"), urlconf_callables)
 
     def test_named_handlers(self):
-        for code in [400, 404, 500]:
+        for code in [400, 403, 404, 500]:
             with self.subTest(code=code):
                 self.assertEqual(self.resolver.resolve_error_handler(code), empty_view)
 
     def test_callable_handlers(self):
-        for code in [400, 404, 500]:
+        for code in [400, 403, 404, 500]:
             with self.subTest(code=code):
                 self.assertEqual(
                     self.callable_resolver.resolve_error_handler(code), empty_view

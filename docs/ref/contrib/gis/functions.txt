@@ -257,8 +257,6 @@ value of the geometry.
 ``ClosestPoint``
 ================
 
-.. versionadded:: 5.0
-
 .. class:: ClosestPoint(expr1, expr2, **extra)
 
 *Availability*: `PostGIS <https://postgis.net/docs/ST_ClosestPoint.html>`__,
@@ -359,31 +357,43 @@ are returned unchanged.
 ``FromWKB``
 ===========
 
-.. class:: FromWKB(expression, **extra)
+.. class:: FromWKB(expression, srid=0, **extra)
 
 *Availability*: MariaDB, `MySQL
 <https://dev.mysql.com/doc/refman/en/gis-wkb-functions.html#function_st-geomfromwkb>`__,
 Oracle, `PostGIS <https://postgis.net/docs/ST_GeomFromWKB.html>`__, SpatiaLite
 
-Creates geometry from `Well-known binary (WKB)`_ representation.
+Creates geometry from `Well-known binary (WKB)`_ representation. The optional
+``srid`` argument allows to specify the SRID of the resulting geometry.
+``srid`` is ignored on Oracle.
+
+.. versionchanged:: 5.1
+
+    The ``srid`` argument was added.
 
 ``FromWKT``
 ===========
 
-.. class:: FromWKT(expression, **extra)
+.. class:: FromWKT(expression, srid=0, **extra)
 
 *Availability*: MariaDB, `MySQL
 <https://dev.mysql.com/doc/refman/en/gis-wkt-functions.html#function_st-geomfromtext>`__,
 Oracle, `PostGIS <https://postgis.net/docs/ST_GeomFromText.html>`__, SpatiaLite
 
-Creates geometry from `Well-known text (WKT)`_ representation.
+Creates geometry from `Well-known text (WKT)`_ representation. The optional
+``srid`` argument allows to specify the SRID of the resulting geometry.
+``srid`` is ignored on Oracle.
+
+.. versionchanged:: 5.1
+
+    The ``srid`` argument was added.
 
 ``GeoHash``
 ===========
 
 .. class:: GeoHash(expression, precision=None, **extra)
 
-*Availability*: `MySQL
+*Availability*: MariaDB, `MySQL
 <https://dev.mysql.com/doc/refman/en/spatial-geohash-functions.html#function_st-geohash>`__,
 `PostGIS <https://postgis.net/docs/ST_GeoHash.html>`__, SpatiaLite
 (LWGEOM/RTTOPO)
@@ -395,6 +405,10 @@ The ``precision`` keyword argument controls the number of characters in the
 result.
 
 __ https://en.wikipedia.org/wiki/Geohash
+
+.. versionchanged:: 5.2
+
+    MariaDB 11.7+ support was added.
 
 ``GeometryDistance``
 ====================
@@ -434,12 +448,16 @@ geometry. Returns ``True`` if its value is empty and ``False`` otherwise.
 
 .. class:: IsValid(expr)
 
-*Availability*: `MySQL
+*Availability*: MariaDB, `MySQL
 <https://dev.mysql.com/doc/refman/en/spatial-convenience-functions.html#function_st-isvalid>`__,
 `PostGIS <https://postgis.net/docs/ST_IsValid.html>`__, Oracle, SpatiaLite
 
 Accepts a geographic field or expression and tests if the value is well formed.
 Returns ``True`` if its value is a valid geometry and ``False`` otherwise.
+
+.. versionchanged:: 5.2
+
+    MariaDB 11.7+ support was added.
 
 ``Length``
 ==========

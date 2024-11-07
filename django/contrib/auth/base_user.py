@@ -2,6 +2,7 @@
 This module allows importing AbstractBaseUser even when django.contrib.auth is
 not in INSTALLED_APPS.
 """
+
 import unicodedata
 
 from django.conf import settings
@@ -34,6 +35,9 @@ class BaseUserManager(models.Manager):
 
     def get_by_natural_key(self, username):
         return self.get(**{self.model.USERNAME_FIELD: username})
+
+    async def aget_by_natural_key(self, username):
+        return await self.aget(**{self.model.USERNAME_FIELD: username})
 
 
 class AbstractBaseUser(models.Model):

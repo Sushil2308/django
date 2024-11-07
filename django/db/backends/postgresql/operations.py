@@ -32,7 +32,9 @@ class DatabaseOperations(BaseDatabaseOperations):
             "BUFFERS",
             "COSTS",
             "GENERIC_PLAN",
+            "MEMORY",
             "SETTINGS",
+            "SERIALIZE",
             "SUMMARY",
             "TIMING",
             "VERBOSE",
@@ -296,9 +298,14 @@ class DatabaseOperations(BaseDatabaseOperations):
     if is_psycopg3:
 
         def last_executed_query(self, cursor, sql, params):
-            try:
-                return self.compose_sql(sql, params)
-            except errors.DataError:
+            if self.connection.features.uses_server_side_binding:
+                try:
+                    return self.compose_sql(sql, params)
+                except errors.DataError:
+                    return None
+            else:
+                if cursor._query and cursor._query.query is not None:
+                    return cursor._query.query.decode()
                 return None
 
     else:
@@ -322,11 +329,6 @@ class DatabaseOperations(BaseDatabaseOperations):
             for field in fields
         ]
         return "RETURNING %s" % ", ".join(columns), ()
-
-    def bulk_insert_sql(self, fields, placeholder_rows):
-        placeholder_rows_sql = (", ".join(row) for row in placeholder_rows)
-        values_sql = ", ".join("(%s)" % sql for sql in placeholder_rows_sql)
-        return "VALUES " + values_sql
 
     if is_psycopg3:
 
@@ -365,6 +367,9 @@ class DatabaseOperations(BaseDatabaseOperations):
 
     def explain_query_prefix(self, format=None, **options):
         extra = {}
+        if serialize := options.pop("serialize", None):
+            if serialize.upper() in {"TEXT", "BINARY"}:
+                extra["SERIALIZE"] = serialize.upper()
         # Normalize options.
         if options:
             options = {

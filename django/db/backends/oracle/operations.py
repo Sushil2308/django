@@ -165,6 +165,9 @@ END;
 
     def datetime_extract_sql(self, lookup_type, sql, params, tzname):
         sql, params = self._convert_sql_to_tz(sql, params, tzname)
+        if lookup_type == "second":
+            # Truncate fractional seconds.
+            return f"FLOOR(EXTRACT(SECOND FROM {sql}))", params
         return self.date_extract_sql(lookup_type, sql, params)
 
     def datetime_trunc_sql(self, lookup_type, sql, params, tzname):
@@ -187,6 +190,12 @@ END;
             # Cast to DATE removes sub-second precision.
             return f"CAST({sql} AS DATE)", params
         return f"TRUNC({sql}, %s)", (*params, trunc_param)
+
+    def time_extract_sql(self, lookup_type, sql, params):
+        if lookup_type == "second":
+            # Truncate fractional seconds.
+            return f"FLOOR(EXTRACT(SECOND FROM {sql}))", params
+        return self.date_extract_sql(lookup_type, sql, params)
 
     def time_trunc_sql(self, lookup_type, sql, params, tzname=None):
         # The implementation is similar to `datetime_trunc_sql` as both
@@ -286,6 +295,8 @@ END;
         columns = []
         for param in returning_params:
             value = param.get_value()
+            # Can be removed when cx_Oracle is no longer supported and
+            # python-oracle 2.1.2 becomes the minimum supported version.
             if value == []:
                 raise DatabaseError(
                     "The database did not return a new row id. Probably "
@@ -338,9 +349,10 @@ END;
     def lookup_cast(self, lookup_type, internal_type=None):
         if lookup_type in ("iexact", "icontains", "istartswith", "iendswith"):
             return "UPPER(%s)"
-        if (
-            lookup_type != "isnull" and internal_type in ("BinaryField", "TextField")
-        ) or (lookup_type == "exact" and internal_type == "JSONField"):
+        if lookup_type != "isnull" and internal_type in (
+            "BinaryField",
+            "TextField",
+        ):
             return "DBMS_LOB.SUBSTR(%s)"
         return "%s"
 
@@ -659,18 +671,20 @@ END;
         return self._get_no_autofield_sequence_name(table) if row is None else row[0]
 
     def bulk_insert_sql(self, fields, placeholder_rows):
+        field_placeholders = [
+            BulkInsertMapper.types.get(
+                getattr(field, "target_field", field).get_internal_type(), "%s"
+            )
+            for field in fields
+            if field
+        ]
         query = []
         for row in placeholder_rows:
             select = []
             for i, placeholder in enumerate(row):
                 # A model without any fields has fields=[None].
                 if fields[i]:
-                    internal_type = getattr(
-                        fields[i], "target_field", fields[i]
-                    ).get_internal_type()
-                    placeholder = (
-                        BulkInsertMapper.types.get(internal_type, "%s") % placeholder
-                    )
+                    placeholder = field_placeholders[i] % placeholder
                 # Add columns aliases to the first select to avoid "ORA-00918:
                 # column ambiguously defined" when two or more columns in the
                 # first select have the same value.
